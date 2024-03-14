@@ -2,6 +2,17 @@
 *(This script is made for linux. Only tested on Ubuntu 22.04 with Python 3.10.12)*
 With this script, you can easily generate pretty decent docstrings for your python projects. It will store your created profiles in `~/.gendocstring` to save you some time.
 
+### Example
+```python
+"""
+     Lesson               : INFO-F-101
+     Project name         : Minesweeper
+     Author               : John Doe
+     Email                : john.doe@ulb.be
+     Matricule            : 000123456
+"""
+```
+
 ## Installation
 
 ### Dependencies
