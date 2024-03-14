@@ -1,12 +1,13 @@
-#!/bin/sh
-if [ -f /usr/local/bin/gendocstring ]; then
-    echo "gendocstring is already installed. Exiting."
-    exit 1
-fi
+#!/bin/bash
 
 if [ "$EUID" -ne 0 ]
   then echo "Please run as root"
   exit
+fi
+
+if [ -f /usr/local/bin/gendocstring ]; then
+    echo "gendocstring is already installed. Exiting."
+    exit 1
 fi
 
 echo "Installing gendocstring..."
