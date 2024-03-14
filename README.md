@@ -18,7 +18,7 @@ curl -s https://raw.githubusercontent.com/F2Ville/gendocstring/master/install.sh
 ```
 
 ## Usage
-You can use the script with `--copy` to copy the generated docstring to your clipboard.
+You can use the script with `--copy` to copy the generated docstring to your clipboard. \
 */!\\ `--copy` option requires `xclip` to be installed on your system, and it is **not already implemented**. It is planned for the next release.*
 ```bash
 gendocstring
