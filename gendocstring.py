@@ -1,6 +1,8 @@
 #!/bin/python3
 import os
+import sys
 import json
+
 
 class Config:
     def __init__(self):
@@ -16,7 +18,7 @@ class Config:
 
     def getProfiles(self):
         return self.profiles
-    
+
     def save(self):
         f = open(self._config_file_path_, "w+")
         f.write(json.dumps(self.__dict__))
@@ -30,35 +32,46 @@ class Config:
         except Exception as e:
             if type(e) == FileNotFoundError:
                 self.save()
-            # print(f"Error loading config: {e}")
+            else:
+                print(f"Error loading config: {e}")
+
+    def createProfile():
+        global config
+        fields = [
+            "Firstname",
+            "Lastname",
+            "Email",
+            "Matricule"
+        ]
+        profile = {}
+        for field in fields:
+            profile[field] = input(f"{field} ? : ")
+        config.load()
+        config.profiles.append(profile)
+        config.save()
+
+
+class DocString:
+    def __init__(self, datas: dict):
+        self.datas = datas
+
+    def generate(self, clipboard: bool = False):
+        spacing = " " * 5
+        print("\n\n\x1b[94m\"\"\"")
+        def formatToDisplay(k, v): return f"{spacing}{k:<20} : {v}"
+        for k, v in self.datas.items():
+            print(formatToDisplay(k, v))
+        print("\"\"\"\x1b[0m")
+        dstring = '"""\n' + \
+            '\n'.join(map(lambda x: formatToDisplay(
+                x[0], x[1]), self.datas.items())) + '\n"""'
+        if clipboard:
+            os.system(f"echo '{dstring}' | xclip -sel c")
+            print("\n\x1b[92mCopied to clipboard\x1b[0m")
+        return dstring
 
 config = Config()
-
-def generateDocString(datas: dict, clipboard: bool = False):
-    spacing = " " * 5
-    print("\n\n\x1b[94m\"\"\"")
-    formatToDisplay = lambda k, v : f"{spacing}{k:<20} : {v}"
-    for k, v in datas.items():
-        print(formatToDisplay(k,v))
-    print("\"\"\"\x1b[0m")
-    if clipboard:
-        dstring = '"""\n' + '\n'.join(map(lambda x: formatToDisplay(x[0],x[1]),datas.items())) + '\n"""'
-        os.system(f"echo '{dstring}' | xclip -sel c")
-
-def createProfile():
-    global config
-    fields = [
-        "Firstname",
-        "Lastname",
-        "Email",
-        "Matricule"
-    ]
-    profile = {}
-    for field in fields:
-        profile[field] = input(f"{field} ? : ")
-    config.load()
-    config.profiles.append(profile)
-    config.save()
+args = sys.argv[1:]
 
 def main(autoCreate: bool = False):
     global config
@@ -71,7 +84,8 @@ def main(autoCreate: bool = False):
         print("Profiles : ")
         i = 0
         for profile in config.profiles:
-            print(f"[{i}] {profile['Firstname']} {profile['Lastname']} - {profile['Email']} - {profile['Matricule']}")
+            print(
+                f"[{i}] {profile['Firstname']} {profile['Lastname']} - {profile['Email']} - {profile['Matricule']}")
             i += 1
         print("\n[c] Create new profile")
         print("[d <index>] Delete profile")
@@ -81,7 +95,7 @@ def main(autoCreate: bool = False):
             index = input("Selection : ").lower()
         print("\n")
         if index == "c":
-            createProfile()
+            config.createProfile()
             main()
         elif index.startswith("d "):
             index = int(index.split(' ')[1])
@@ -109,11 +123,38 @@ def main(autoCreate: bool = False):
         }
         if project_desc:
             obj["Project description"] = project_desc
-        generateDocString(obj, clipboard=True)
-                    
+        docstring = DocString(obj)
+        copyClipBoard = (args.count("-c") > 0 or args.count("--copy") > 0)
+        ds = docstring.generate(clipboard=copyClipBoard)
+        if (args.count("-f") > 0 or args.count("--file") > 0):
+            filename = args[args.index("-f") + 1] if args.count("-f") > 0 else args[args.index("--file") + 1]
+            with open(filename, "r+") as f:
+                fcontent = f.read()
+                f.seek(0, 0)
+                f.write(ds + "\n\n" + fcontent)
+                print(f"\n\x1b[92mDocstring written to {filename}\x1b[0m")
+
     else:
         if (autoCreate):
-            createProfile()
+            config.createProfile()
         main()
+
+
 if __name__ == "__main__":
+    if (args.count("-h") > 0 or args.count("--help") > 0):
+        print("Usage : gendocstring [options]\n\nOptions :")
+        print("\t-c, --copy : Copy the generated docstring to clipboard")
+        print("\t-f, --file <filename> : Write the generated docstring to a file")
+        print("\t-h, --help : Display this help message")
+        exit(0)
+
+    if args.count("-f") > 0 or args.count("--file") > 0:
+        try:
+            filename = args[args.index("-f") + 1] if args.count("-f") > 0 else args[args.index("--file") + 1]
+            if not os.path.exists(filename):
+                print("Error : File not found")
+                exit(1)
+        except:
+            print("Error : No filename provided")
+            exit(1)
     main(autoCreate=True)

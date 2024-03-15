@@ -39,6 +39,6 @@ gendocstring --copy
 
 # TODO
 
-- [ ] Implement `--copy` option
+- [x] Implement `--copy` option
 - [ ] Add support for other OS
-- [ ] Implement `<file>` option to directly write the docstring in a file (For: Python, C, C++, JS, Bash)
+- [x] Implement `<file>` option to directly write the docstring in a file (For: Python, C, C++, JS, Bash)
