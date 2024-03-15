@@ -37,6 +37,11 @@ gendocstring
 gendocstring --copy
 ```
 
+To write the docstring directly in a file, you can use the `<file>` option.
+```bash
+gendocstring -f <file>
+```
+
 # TODO
 
 - [x] Implement `--copy` option
