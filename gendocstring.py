@@ -35,8 +35,7 @@ class Config:
             else:
                 print(f"Error loading config: {e}")
 
-    def createProfile():
-        global config
+    def createProfile(self):
         fields = [
             "Firstname",
             "Lastname",
@@ -46,9 +45,9 @@ class Config:
         profile = {}
         for field in fields:
             profile[field] = input(f"{field} ? : ")
-        config.load()
-        config.profiles.append(profile)
-        config.save()
+        self.load()
+        self.profiles.append(profile)
+        self.save()
 
 
 class DocString:
@@ -73,8 +72,20 @@ class DocString:
 config = Config()
 args = sys.argv[1:]
 
+def clear():
+ 
+    # for windows
+    if os.name == 'nt':
+        os.system('cls')
+    # for mac and linux(here, os.name is 'posix')
+    else:
+        os.system('clear')
+
 def main(autoCreate: bool = False):
     global config
+    clear()
+    print("\x1b[94mWelcome to gendocstring !\x1b[0m\n")
+    print("\x1b[30m[x] Copy disabled\x1b[0m\n\n" if not (args.count("-c") > 0 or args.count("--copy") > 0) else "\x1b[92m[x] Copy enabled\x1b[0m\n\n")
     firstname = ""
     lastname = ""
     email = ""
@@ -91,11 +102,21 @@ def main(autoCreate: bool = False):
         print("[d <index>] Delete profile")
         print("[q] Quit\n")
         index = ""
-        while index != "c" and index != "q" and (not index.startswith("d ") and (len(index.split(' ')) != 2 or not index.split(' ')[1].isdigit())) and (not index.isdigit() or int(index) >= len(config.profiles)):
+        while index != "c" and index != "q" and index != "x" and (not index.startswith("d ") and (len(index.split(' ')) != 2 or not index.split(' ')[1].isdigit())) and (not index.isdigit() or int(index) >= len(config.profiles)):
             index = input("Selection : ").lower()
         print("\n")
         if index == "c":
             config.createProfile()
+            main()
+        elif index == "x":
+            if args.count("-c") > 0 or args.count("--copy") > 0:
+                try:
+                    args.remove("-c")
+                    args.remove("--copy")
+                except:
+                    pass
+            else:
+                args.append("-c")
             main()
         elif index.startswith("d "):
             index = int(index.split(' ')[1])
@@ -111,21 +132,21 @@ def main(autoCreate: bool = False):
             lastname = profile["Lastname"]
             email = profile["Email"]
             matricule = profile["Matricule"]
-        lesson = input("Lesson ? (ex: INFO-F-101) : ")
-        project_name = input("Project name ? : ")
-        project_desc = input("Project description ? (leave blank for none) : ")
-        obj = {
-            "Lesson": lesson,
-            "Project name": project_name,
-            "Author": f"{firstname} {lastname}",
-            "Email": email,
-            "Matricule": matricule
-        }
-        if project_desc:
-            obj["Project description"] = project_desc
-        docstring = DocString(obj)
-        copyClipBoard = (args.count("-c") > 0 or args.count("--copy") > 0)
-        ds = docstring.generate(clipboard=copyClipBoard)
+            lesson = input("Lesson ? (ex: INFO-F-101) : ")
+            project_name = input("Project name ? : ")
+            project_desc = input("Project description ? (leave blank for none) : ")
+            obj = {
+                "Lesson": lesson,
+                "Project name": project_name,
+                "Author": f"{firstname} {lastname}",
+                "Email": email,
+                "Matricule": matricule
+            }
+            if project_desc:
+                obj["Project description"] = project_desc
+            docstring = DocString(obj)
+            copyClipBoard = (args.count("-c") > 0 or args.count("--copy") > 0)
+            ds = docstring.generate(clipboard=copyClipBoard)
         if (args.count("-f") > 0 or args.count("--file") > 0):
             filename = args[args.index("-f") + 1] if args.count("-f") > 0 else args[args.index("--file") + 1]
             with open(filename, "r+") as f:
@@ -137,7 +158,7 @@ def main(autoCreate: bool = False):
     else:
         if (autoCreate):
             config.createProfile()
-        main()
+            main()
 
 
 if __name__ == "__main__":
